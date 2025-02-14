@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -7,21 +5,10 @@ from flask_socketio import SocketIO, emit, join_room
 import os
 from flask import flash, redirect, url_for, session
 
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your_secret_key')
-DB_USERNAME = "uds67epwmwjx6izv"
-DB_PASSWORD = "mDHWTFY3FcYCpLsDAq1V"
-DB_HOST = "birtrviqdlzckt1cjhp2-mysql.services.clever-cloud.com"
-DB_NAME = "birtrviqdlzckt1cjhp2"
-DB_PORT = 3306  # MySQL default port
-
-app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('DATABASE_URL', 'mysql+pymysql://uds67epwmwjx6izv:mDHWTFY3FcYCpLsDAq1V@birtrviqdlzckt1cjhp2-mysql.services.clever-cloud.com:3306/birtrviqdlzckt1cjhp2')
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://jai:admin123@127.0.0.1:3306/common_contributions_tracker'
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -395,4 +382,4 @@ def decline_request(request_id):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    socketio.run(app, debug=True, host='127.0.0.1', port=5000)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
