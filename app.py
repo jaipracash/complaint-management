@@ -228,28 +228,35 @@ def chat(request_id):
     return render_template('chat.html', request=request, messages=messages)
 
 @socketio.on('send_message')
-@login_required
 def handle_message(data):
+    print(f"Received message data: {data}")  # Log incoming data
     request_id = data['request_id']
     message_text = data['message']
 
-    # Save the message to the database
-    new_message = Message(
-        request_id=request_id,
-        user_id=current_user.id,
-        message=message_text
-    )
-    db.session.add(new_message)
-    db.session.commit()
+    try:
+        # Save the message to the database
+        new_message = Message(
+            request_id=request_id,
+            user_id=current_user.id,
+            message=message_text
+        )
+        db.session.add(new_message)
+        db.session.commit()
+        print(f"Message saved to database: {new_message.id}")
 
-    # Emit the message to all clients in the room
-    emit('new_message', {
-        'request_id': request_id,
-        'user_id': current_user.id,
-        'username': current_user.username,
-        'message': message_text,
-        'timestamp': new_message.timestamp.strftime('%Y-%m-%d %H:%M:%S')
-    }, room=str(request_id))
+        # Emit the message to all clients in the room
+        emit('new_message', {
+            'request_id': request_id,
+            'user_id': current_user.id,
+            'username': current_user.username,
+            'message': message_text,
+            'timestamp': new_message.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+        }, room=str(request_id))
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error saving message to database: {e}")
+        emit('error', {'message': 'Failed to save message.'})
+
 
 @socketio.on('join_room')
 @login_required
