@@ -144,8 +144,9 @@
     </div>
 
     <script>
-        var socket = io.connect('https://complaint-management-d2zl.onrender.com');
-        const requestId = {{ request.id }};
+        var socket = io.connect('https://complaint-management-d2zl.onrender.com', {
+        transports: ['websocket']
+        });        const requestId = {{ request.id }};
         const currentUserId = {{ current_user.id }};
 
         socket.emit('join_room', { request_id: requestId });
