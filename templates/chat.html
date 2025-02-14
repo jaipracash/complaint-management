@@ -144,10 +144,17 @@
     </div>
 
     <script>
-        var socket = io.connect('https://complaint-management-d2zl.onrender.com', {
+       var socket = io.connect('https://complaint-management-d2zl.onrender.com', {
         transports: ['websocket']
-        });        const requestId = {{ request.id }};
-        const currentUserId = {{ current_user.id }};
+        });
+
+        socket.on('connect', function() {
+            console.log('WebSocket connected!');
+        });
+
+        socket.on('connect_error', function(error) {
+            console.error('WebSocket connection error:', error);
+        });
 
         socket.emit('join_room', { request_id: requestId });
 
@@ -171,22 +178,22 @@
                 document.getElementById('message').value = '';
             }
         };
-
         socket.on('new_message', function(data) {
-            const messageContainer = document.getElementById('messages');
-            const newMessage = document.createElement('div');
+        console.log('Received new message:', data);
+        const messageContainer = document.getElementById('messages');
+        const newMessage = document.createElement('div');
 
-            const isSender = data.user_id === currentUserId;
-            newMessage.classList.add('message', isSender ? 'sender' : 'receiver');
+        const isSender = data.user_id === currentUserId;
+        newMessage.classList.add('message', isSender ? 'sender' : 'receiver');
 
-            newMessage.innerHTML = `
-                ${data.message}
-                <small>${new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</small>
-            `;
+        newMessage.innerHTML = `
+            ${data.message}
+            <small>${new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</small>
+        `;
 
-            messageContainer.appendChild(newMessage);
-            messageContainer.scrollTop = messageContainer.scrollHeight;
-        });
+        messageContainer.appendChild(newMessage);
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    });
     </script>
 
 </body>

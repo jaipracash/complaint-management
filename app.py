@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -9,6 +11,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your_secret_key')
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('DATABASE_URL', 'mysql+pymysql://uds67epwmwjx6izv:mDHWTFY3FcYCpLsDAq1V@birtrviqdlzckt1cjhp2-mysql.services.clever-cloud.com:3306/birtrviqdlzckt1cjhp2')
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -256,7 +259,10 @@ def handle_message(data):
         db.session.rollback()
         print(f"Error saving message to database: {e}")
         emit('error', {'message': 'Failed to save message.'})
-
+@socketio.on('connect')
+def handle_connect():
+    if not current_user.is_authenticated:
+        return False  # Reject the connection
 
 @socketio.on('join_room')
 @login_required
